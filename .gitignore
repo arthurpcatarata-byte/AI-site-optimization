@@ -1,0 +1,3 @@
+node_modules/
+siteopt.db
+*.db-journal

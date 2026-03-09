@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiteOptimizer AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- ==================== AUTH SCREEN ==================== -->
+  <div id="auth-screen" class="screen">
+    <div class="auth-container">
+      <div class="auth-brand">
+        <div class="brand-icon">⬡</div>
+        <h1>SiteOptimizer <span class="accent">AI</span></h1>
+        <p class="tagline">AI-Powered Site Feasibility Analysis</p>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="tab-btn active" data-tab="login">Sign In</button>
+          <button class="tab-btn" data-tab="register">Sign Up</button>
+        </div>
+
+        <form id="login-form" class="auth-form">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+          <div id="login-error" class="error-msg"></div>
+        </form>
+
+        <form id="register-form" class="auth-form hidden">
+          <div class="form-group">
+            <label for="reg-username">Username</label>
+            <input type="text" id="reg-username" placeholder="johndoe" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" placeholder="Min 6 characters" required minlength="6">
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+          <div id="register-error" class="error-msg"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DASHBOARD ==================== -->
+  <div id="dashboard-screen" class="screen hidden">
+    <nav class="navbar">
+      <div class="nav-brand">
+        <span class="brand-icon-sm">⬡</span>
+        <span class="nav-title">SiteOptimizer <span class="accent">AI</span></span>
+      </div>
+      <div class="nav-right">
+        <span id="nav-user" class="nav-user"></span>
+        <button id="logout-btn" class="btn btn-outline btn-sm">Logout</button>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <!-- Dashboard View -->
+      <div id="dashboard-view">
+        <div class="page-header">
+          <div>
+            <h2>Your Sites</h2>
+            <p class="subtitle">Manage and analyze your site projects</p>
+          </div>
+          <button id="add-site-btn" class="btn btn-primary">+ Add New Site</button>
+        </div>
+
+        <div id="stats-row" class="stats-row">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Total Sites</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-avg-score">—</div>
+            <div class="stat-label">Avg Feasibility</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-best">—</div>
+            <div class="stat-label">Best Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-total-area">—</div>
+            <div class="stat-label">Total Area (sqft)</div>
+          </div>
+        </div>
+
+        <div id="sites-list" class="sites-grid">
+          <div class="empty-state">
+            <div class="empty-icon">📍</div>
+            <h3>No sites yet</h3>
+            <p>Add your first site to get AI-powered feasibility analysis</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Site View -->
+      <div id="add-site-view" class="hidden">
+        <div class="page-header">
+          <div>
+            <button id="back-to-dashboard" class="btn btn-ghost">&larr; Back</button>
+            <h2>Add New Site</h2>
+            <p class="subtitle">Enter site details for AI analysis</p>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <form id="site-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="site-name">Project Name</label>
+                <input type="text" id="site-name" placeholder="e.g. Riverside Complex" required>
+              </div>
+              <div class="form-group">
+                <label for="site-location">Location</label>
+                <input type="text" id="site-location" placeholder="e.g. 123 Main St, City" required>
+              </div>
+              <div class="form-group">
+                <label for="site-size">Size (sq ft)</label>
+                <input type="number" id="site-size" placeholder="e.g. 15000" min="100" required>
+              </div>
+              <div class="form-group">
+                <label for="site-zoning">Zoning Type</label>
+                <select id="site-zoning" required>
+                  <option value="">Select zoning...</option>
+                  <option value="residential">Residential</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="industrial">Industrial</option>
+                  <option value="mixed">Mixed Use</option>
+                  <option value="agricultural">Agricultural</option>
+                </select>
+              </div>
+              <div class="form-group form-group-full">
+                <label for="site-cost">Estimated Cost ($)</label>
+                <input type="number" id="site-cost" placeholder="e.g. 500000" min="1000" required>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="analyze-btn">
+                <span class="btn-text">🤖 Run AI Analysis</span>
+                <span class="btn-loading hidden">Analyzing...</span>
+              </button>
+            </div>
+            <div id="site-form-error" class="error-msg"></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Results View -->
+      <div id="results-view" class="hidden">
+        <div class="page-header">
+          <div>
+            <button id="back-to-dashboard-2" class="btn btn-ghost">&larr; Back to Dashboard</button>
+            <h2 id="result-site-name">Site Analysis</h2>
+            <p class="subtitle" id="result-site-location"></p>
+          </div>
+        </div>
+
+        <div class="results-grid">
+          <div class="result-card score-card">
+            <h3>Overall Feasibility</h3>
+            <div class="score-circle" id="overall-score">
+              <svg viewBox="0 0 120 120">
+                <circle class="score-bg" cx="60" cy="60" r="52"/>
+                <circle class="score-fill" cx="60" cy="60" r="52" id="score-ring"/>
+              </svg>
+              <div class="score-text" id="score-value">0%</div>
+            </div>
+            <div class="score-label" id="score-verdict"></div>
+          </div>
+
+          <div class="result-card">
+            <h3>Score Breakdown</h3>
+            <canvas id="radar-chart"></canvas>
+          </div>
+
+          <div class="result-card">
+            <h3>Category Scores</h3>
+            <canvas id="bar-chart"></canvas>
+          </div>
+
+          <div class="result-card detail-card">
+            <h3>Site Details</h3>
+            <div class="detail-grid" id="site-details"></div>
+          </div>
+
+          <div class="result-card recommendations-card">
+            <h3>AI Recommendations</h3>
+            <div id="recommendations"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
