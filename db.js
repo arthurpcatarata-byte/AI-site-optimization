@@ -21,6 +21,8 @@ db.exec(`
     user_id INTEGER NOT NULL,
     name TEXT NOT NULL,
     location TEXT NOT NULL,
+    latitude REAL,
+    longitude REAL,
     size_sqft REAL NOT NULL,
     zoning TEXT NOT NULL,
     estimated_cost REAL NOT NULL,

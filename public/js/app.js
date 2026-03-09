@@ -152,7 +152,7 @@ function renderSites() {
         <div class="site-card-meta">
           <span>📍 ${escapeHtml(site.location)}</span>
           <span>📐 ${Number(site.size_sqft).toLocaleString()} sqft · ${escapeHtml(capitalize(site.zoning))}</span>
-          <span>💰 $${Number(site.estimated_cost).toLocaleString()}</span>
+          <span>💰 ₱${Number(site.estimated_cost).toLocaleString()}</span>
         </div>
         <div class="site-card-actions">
           <button class="btn btn-danger delete-site-btn" data-id="${site.id}" title="Delete">🗑 Delete</button>
@@ -212,6 +212,8 @@ function initAddSite() {
           location: document.getElementById('site-location').value,
           size_sqft: parseFloat(document.getElementById('site-size').value),
           zoning: document.getElementById('site-zoning').value,
+          latitude: document.getElementById('site-lat').value || null,
+          longitude: document.getElementById('site-lng').value || null,
           estimated_cost: parseFloat(document.getElementById('site-cost').value)
         })
       });
@@ -279,8 +281,8 @@ function renderResults(site) {
     { label: 'Location', value: site.location },
     { label: 'Size', value: `${Number(site.size_sqft).toLocaleString()} sqft` },
     { label: 'Zoning', value: capitalize(site.zoning) },
-    { label: 'Est. Cost', value: `$${Number(site.estimated_cost).toLocaleString()}` },
-    { label: 'Cost/sqft', value: `$${(site.estimated_cost / site.size_sqft).toFixed(2)}` },
+    { label: 'Est. Cost', value: `₱${Number(site.estimated_cost).toLocaleString()}` },
+    { label: 'Cost/sqft', value: `₱${(site.estimated_cost / site.size_sqft).toFixed(2)}` },
     { label: 'Analyzed', value: new Date(site.created_at).toLocaleDateString() }
   ].map(d => `
     <div class="detail-item">
@@ -288,6 +290,9 @@ function renderResults(site) {
       <div class="value">${escapeHtml(String(d.value))}</div>
     </div>
   `).join('');
+
+  // GPS Map
+  renderMap(site);
 
   // Recommendations
   renderRecommendations(site);
@@ -376,6 +381,38 @@ function renderBarChart(site) {
       plugins: { legend: { display: false } }
     }
   });
+}
+
+function renderMap(site) {
+  const mapCard = document.getElementById('map-card');
+  const mapContainer = document.getElementById('site-map');
+
+  if (site.latitude && site.longitude) {
+    mapCard.style.display = '';
+    mapContainer.innerHTML = '';
+
+    // Destroy previous map instance if any
+    if (state.map) {
+      state.map.remove();
+      state.map = null;
+    }
+
+    const map = L.map(mapContainer).setView([site.latitude, site.longitude], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+    L.marker([site.latitude, site.longitude])
+      .addTo(map)
+      .bindPopup(`<b>${escapeHtml(site.name)}</b><br>${escapeHtml(site.location)}`)
+      .openPopup();
+    state.map = map;
+
+    // Fix tile rendering when container was hidden
+    setTimeout(() => map.invalidateSize(), 200);
+  } else {
+    mapCard.style.display = 'none';
+  }
 }
 
 function renderRecommendations(site) {

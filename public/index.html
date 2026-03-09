@@ -6,6 +6,8 @@
   <title>SiteOptimizer AI</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
   <!-- ==================== AUTH SCREEN ==================== -->
@@ -127,7 +129,15 @@
               </div>
               <div class="form-group">
                 <label for="site-location">Location</label>
-                <input type="text" id="site-location" placeholder="e.g. 123 Main St, City" required>
+                <input type="text" id="site-location" placeholder="e.g. Makati City, Metro Manila" required>
+              </div>
+              <div class="form-group">
+                <label for="site-lat">Latitude</label>
+                <input type="number" id="site-lat" step="any" placeholder="e.g. 14.5547" min="-90" max="90">
+              </div>
+              <div class="form-group">
+                <label for="site-lng">Longitude</label>
+                <input type="number" id="site-lng" step="any" placeholder="e.g. 121.0244" min="-180" max="180">
               </div>
               <div class="form-group">
                 <label for="site-size">Size (sq ft)</label>
@@ -145,8 +155,8 @@
                 </select>
               </div>
               <div class="form-group form-group-full">
-                <label for="site-cost">Estimated Cost ($)</label>
-                <input type="number" id="site-cost" placeholder="e.g. 500000" min="1000" required>
+                <label for="site-cost">Estimated Cost (₱)</label>
+                <input type="number" id="site-cost" placeholder="e.g. 25000000" min="1000" required>
               </div>
             </div>
             <div class="form-actions">
@@ -196,6 +206,11 @@
           <div class="result-card detail-card">
             <h3>Site Details</h3>
             <div class="detail-grid" id="site-details"></div>
+          </div>
+
+          <div class="result-card map-card" id="map-card" style="display:none;">
+            <h3>GPS Location</h3>
+            <div id="site-map" style="width:100%;height:350px;border-radius:8px;overflow:hidden;"></div>
           </div>
 
           <div class="result-card recommendations-card">

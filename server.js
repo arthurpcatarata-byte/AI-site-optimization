@@ -93,8 +93,8 @@ function calculateFeasibilityScores(site) {
   const zoningScores = { residential: 0.85, commercial: 0.78, industrial: 0.65, mixed: 0.90, agricultural: 0.55 };
   const market = Math.round((zoningScores[site.zoning.toLowerCase()] || 0.7) * (0.8 + Math.random() * 0.2) * 100) / 100;
 
-  // Infrastructure score: inversely related to cost per sqft
-  const infrastructure = Math.round(Math.max(0.3, Math.min(1, 1 - costPerSqft / 500)) * (0.7 + Math.random() * 0.3) * 100) / 100;
+  // Infrastructure score: inversely related to cost per sqft (scaled for PHP)
+  const infrastructure = Math.round(Math.max(0.3, Math.min(1, 1 - costPerSqft / 25000)) * (0.7 + Math.random() * 0.3) * 100) / 100;
 
   // Regulatory score: based on zoning
   const regScores = { residential: 0.90, commercial: 0.75, industrial: 0.60, mixed: 0.70, agricultural: 0.80 };
@@ -127,19 +127,26 @@ app.get('/api/sites/:id', authenticate, (req, res) => {
 });
 
 app.post('/api/sites', authenticate, (req, res) => {
-  const { name, location, size_sqft, zoning, estimated_cost } = req.body;
+  const { name, location, latitude, longitude, size_sqft, zoning, estimated_cost } = req.body;
   if (!name || !location || !size_sqft || !zoning || !estimated_cost) {
     return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  const lat = latitude ? parseFloat(latitude) : null;
+  const lng = longitude ? parseFloat(longitude) : null;
+  if ((lat !== null && (isNaN(lat) || lat < -90 || lat > 90)) ||
+      (lng !== null && (isNaN(lng) || lng < -180 || lng > 180))) {
+    return res.status(400).json({ error: 'Invalid GPS coordinates' });
   }
 
   const scores = calculateFeasibilityScores({ size_sqft, zoning, estimated_cost });
 
   const result = db.prepare(`
-    INSERT INTO sites (user_id, name, location, size_sqft, zoning, estimated_cost,
+    INSERT INTO sites (user_id, name, location, latitude, longitude, size_sqft, zoning, estimated_cost,
       feasibility_score, environmental_score, market_score, infrastructure_score, regulatory_score)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    req.userId, name, location, size_sqft, zoning, estimated_cost,
+    req.userId, name, location, lat, lng, size_sqft, zoning, estimated_cost,
     scores.feasibility_score, scores.environmental_score,
     scores.market_score, scores.infrastructure_score, scores.regulatory_score
   );
