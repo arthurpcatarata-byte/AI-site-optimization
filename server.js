@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -5,10 +6,17 @@ const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
 const path = require('path');
 const db = require('./db');
+const aiService = require('./ai-service');
 
 const app = express();
 const PORT = 3000;
 const JWT_SECRET = crypto.randomBytes(32).toString('hex');
+
+// Initialize AI
+const aiEnabled = aiService.init(process.env.GEMINI_API_KEY);
+if (!aiEnabled) {
+  console.log('  ⚠️  No GEMINI_API_KEY found — using fallback scoring. Add key to .env for real AI analysis.');
+}
 
 // Middleware
 app.use(express.json());
@@ -112,6 +120,11 @@ function calculateFeasibilityScores(site) {
   };
 }
 
+// API status endpoint
+app.get('/api/status', (req, res) => {
+  res.json({ ai_enabled: aiService.isAvailable() });
+});
+
 app.get('/api/sites', authenticate, (req, res) => {
   const sites = db.prepare('SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC').all(req.userId);
   res.json(sites);
@@ -126,7 +139,7 @@ app.get('/api/sites/:id', authenticate, (req, res) => {
   res.json(site);
 });
 
-app.post('/api/sites', authenticate, (req, res) => {
+app.post('/api/sites', authenticate, async (req, res) => {
   const { name, location, latitude, longitude, size_sqft, zoning, estimated_cost } = req.body;
   if (!name || !location || !size_sqft || !zoning || !estimated_cost) {
     return res.status(400).json({ error: 'All fields are required' });
@@ -139,16 +152,38 @@ app.post('/api/sites', authenticate, (req, res) => {
     return res.status(400).json({ error: 'Invalid GPS coordinates' });
   }
 
-  const scores = calculateFeasibilityScores({ size_sqft, zoning, estimated_cost });
+  // Try real AI analysis first, fall back to dummy scores
+  let scores;
+  let aiSummary = null;
+  let aiRecommendations = null;
+  let aiPowered = 0;
+
+  const aiResult = await aiService.analyzeSite({ name, location, latitude: lat, longitude: lng, size_sqft, zoning, estimated_cost });
+  if (aiResult) {
+    scores = {
+      feasibility_score: aiResult.feasibility_score,
+      environmental_score: aiResult.environmental_score,
+      market_score: aiResult.market_score,
+      infrastructure_score: aiResult.infrastructure_score,
+      regulatory_score: aiResult.regulatory_score
+    };
+    aiSummary = aiResult.summary || null;
+    aiRecommendations = JSON.stringify(aiResult.recommendations || []);
+    aiPowered = 1;
+  } else {
+    scores = calculateFeasibilityScores({ size_sqft, zoning, estimated_cost });
+  }
 
   const result = db.prepare(`
     INSERT INTO sites (user_id, name, location, latitude, longitude, size_sqft, zoning, estimated_cost,
-      feasibility_score, environmental_score, market_score, infrastructure_score, regulatory_score)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      feasibility_score, environmental_score, market_score, infrastructure_score, regulatory_score,
+      ai_summary, ai_recommendations, ai_powered)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     req.userId, name, location, lat, lng, size_sqft, zoning, estimated_cost,
     scores.feasibility_score, scores.environmental_score,
-    scores.market_score, scores.infrastructure_score, scores.regulatory_score
+    scores.market_score, scores.infrastructure_score, scores.regulatory_score,
+    aiSummary, aiRecommendations, aiPowered
   );
 
   const site = db.prepare('SELECT * FROM sites WHERE id = ?').get(result.lastInsertRowid);

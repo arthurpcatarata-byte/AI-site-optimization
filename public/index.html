@@ -182,6 +182,7 @@
 
         <div class="results-grid">
           <div class="result-card score-card">
+            <div class="ai-badge" id="ai-badge"></div>
             <h3>Overall Feasibility</h3>
             <div class="score-circle" id="overall-score">
               <svg viewBox="0 0 120 120">
@@ -206,6 +207,11 @@
           <div class="result-card detail-card">
             <h3>Site Details</h3>
             <div class="detail-grid" id="site-details"></div>
+          </div>
+
+          <div class="result-card ai-summary-card" id="ai-summary-card" style="display:none;">
+            <h3>🤖 AI Analysis Summary</h3>
+            <p id="ai-summary-text" class="ai-summary-text"></p>
           </div>
 
           <div class="result-card map-card" id="map-card" style="display:none;">

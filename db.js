@@ -31,6 +31,9 @@ db.exec(`
     market_score REAL,
     infrastructure_score REAL,
     regulatory_score REAL,
+    ai_summary TEXT,
+    ai_recommendations TEXT,
+    ai_powered INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
   );

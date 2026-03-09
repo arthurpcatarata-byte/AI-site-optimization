@@ -551,6 +551,63 @@ body {
   margin-bottom: 0.2rem;
 }
 
+/* AI Badge & Summary */
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.ai-badge.ai-real {
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.2), rgba(0, 206, 201, 0.2));
+  color: var(--success);
+  border: 1px solid rgba(0, 206, 201, 0.3);
+}
+
+.ai-badge.ai-fallback {
+  background: rgba(253, 203, 110, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(253, 203, 110, 0.2);
+}
+
+.ai-summary-card {
+  grid-column: 1 / -1;
+}
+
+.ai-summary-text {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text);
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.05), rgba(0, 206, 201, 0.05));
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent);
+}
+
+.site-card-ai {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.site-card-ai.real {
+  background: rgba(0, 206, 201, 0.15);
+  color: var(--success);
+}
+
+.site-card-ai.fallback {
+  background: rgba(253, 203, 110, 0.1);
+  color: var(--warning);
+}
+
 /* ==================== ANIMATIONS ==================== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }

@@ -27,8 +27,10 @@ An AI-powered site feasibility analysis platform that helps developers, investor
 | Backend    | Node.js, Express    |
 | Database   | SQLite (better-sqlite3) |
 | Auth       | JWT, bcryptjs       |
+| AI Engine  | Google Gemini 2.0 Flash (free tier) |
 | Frontend   | HTML5, CSS3, Vanilla JS |
 | Charts     | Chart.js            |
+| Maps       | Leaflet.js + OpenStreetMap |
 
 ## Getting Started
 
@@ -50,7 +52,16 @@ An AI-powered site feasibility analysis platform that helps developers, investor
    npm install
    ```
 
-3. **Start the server**
+3. **Configure AI (optional but recommended)**
+   - Get a free API key from [Google AI Studio](https://aistudio.google.com/apikey)
+   - Copy `.env.example` to `.env` and add your key:
+   ```bash
+   cp .env.example .env
+   # Edit .env and set GEMINI_API_KEY=your_actual_key
+   ```
+   > Without a key, the app uses basic algorithmic scoring. With a key, you get real-time Gemini AI analysis.
+
+4. **Start the server**
    ```bash
    npm start
    ```
@@ -64,7 +75,9 @@ An AI-powered site feasibility analysis platform that helps developers, investor
 
 ```
 ├── server.js            # Express API server (auth + CRUD + AI scoring)
+├── ai-service.js        # Google Gemini AI integration module
 ├── db.js                # SQLite database initialization
+├── .env.example         # Environment variables template
 ├── package.json         # Project config & dependencies
 └── public/
     ├── index.html       # Single-page application shell

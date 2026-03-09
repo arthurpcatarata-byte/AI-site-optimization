@@ -147,7 +147,10 @@ function renderSites() {
       <div class="site-card fade-in" data-id="${site.id}">
         <div class="site-card-header">
           <span class="site-card-name">${escapeHtml(site.name)}</span>
-          <span class="site-card-score ${tier}">${pct}%</span>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <span class="site-card-ai ${site.ai_powered ? 'real' : 'fallback'}">${site.ai_powered ? '🤖 AI' : '⚙️ Basic'}</span>
+            <span class="site-card-score ${tier}">${pct}%</span>
+          </div>
         </div>
         <div class="site-card-meta">
           <span>📍 ${escapeHtml(site.location)}</span>
@@ -244,6 +247,16 @@ function renderResults(site) {
   document.getElementById('result-site-name').textContent = site.name;
   document.getElementById('result-site-location').textContent = site.location;
 
+  // AI badge
+  const badge = document.getElementById('ai-badge');
+  if (site.ai_powered) {
+    badge.className = 'ai-badge ai-real';
+    badge.textContent = '🤖 Powered by Gemini AI';
+  } else {
+    badge.className = 'ai-badge ai-fallback';
+    badge.textContent = '⚙️ Basic Analysis';
+  }
+
   // Animated score circle
   const pct = Math.round(site.feasibility_score * 100);
   document.getElementById('score-value').textContent = `${pct}%`;
@@ -291,10 +304,19 @@ function renderResults(site) {
     </div>
   `).join('');
 
+  // AI Summary
+  const summaryCard = document.getElementById('ai-summary-card');
+  if (site.ai_summary) {
+    summaryCard.style.display = '';
+    document.getElementById('ai-summary-text').textContent = site.ai_summary;
+  } else {
+    summaryCard.style.display = 'none';
+  }
+
   // GPS Map
   renderMap(site);
 
-  // Recommendations
+  // Recommendations (AI-generated or fallback)
   renderRecommendations(site);
 }
 
@@ -416,6 +438,29 @@ function renderMap(site) {
 }
 
 function renderRecommendations(site) {
+  // Use AI-generated recommendations if available
+  if (site.ai_recommendations) {
+    let aiRecs = [];
+    try {
+      aiRecs = typeof site.ai_recommendations === 'string'
+        ? JSON.parse(site.ai_recommendations) : site.ai_recommendations;
+    } catch { aiRecs = []; }
+
+    if (aiRecs.length > 0) {
+      document.getElementById('recommendations').innerHTML = aiRecs.map(r => `
+        <div class="recommendation">
+          <span class="rec-icon">${escapeHtml(r.icon || '📌')}</span>
+          <div class="rec-text">
+            <strong>${escapeHtml(r.title || 'Recommendation')}</strong>
+            ${escapeHtml(r.text || '')}
+          </div>
+        </div>
+      `).join('');
+      return;
+    }
+  }
+
+  // Fallback static recommendations
   const recs = [];
   const scores = {
     environmental: site.environmental_score,
